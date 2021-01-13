@@ -4,13 +4,13 @@ import TaskForm from "./components/TaskForm";
 import TaskControl from "./components/TaskControl";
 import TaskList from "./components/TaskList";
 import _ from "lodash";
+import {connect} from "react-redux";
+import * as actions from "./actions";
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tasks: [],
-            isDisplayForm: false,
             taskEditing: null,
             filterName: '',
             filterStatus: -1,
@@ -20,109 +20,27 @@ class App extends Component {
         }
     }
 
-    componentDidMount() {
-        if (localStorage && localStorage.getItem('tasks')) {
-            let tasks = JSON.parse(localStorage.getItem('tasks'));
-            this.setState({
-                tasks: tasks
-            });
-        }
-    }
-
-    s4() {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    }
-
-    generateID() {
-        return this.s4() + this.s4() + '-' + this.s4() + '-' + this.s4() + '-'
-            + this.s4() + '-' + this.s4() + this.s4() + '-' + this.s4();
-    }
 
     onToggleForm = () => {
-        if (this.state.isDisplayForm && this.state.taskEditing != null) {
-            this.setState({
-                isDisplayForm: true,
-                taskEditing: null
-            });
-        } else {
-            this.setState({
-                isDisplayForm: !this.state.isDisplayForm,
-                taskEditing: null
-            });
-        }
+        // if (this.state.isDisplayForm && this.state.taskEditing != null) {
+        //     this.setState({
+        //         isDisplayForm: true,
+        //         taskEditing: null
+        //     });
+        // } else {
+        //     this.setState({
+        //         isDisplayForm: !this.state.isDisplayForm,
+        //         taskEditing: null
+        //     });
+        // }
+        this.props.onToggleForm();
     }
 
-    onCloseForm = () => {
-        this.setState({
-            isDisplayForm: false,
-
-        });
-    }
 
     onShowForm = () => {
         this.setState({
             isDisplayForm: true,
         });
-    }
-
-    onSubmit = (data) => {
-        let {tasks} = this.state;
-        if (data.id === '') {
-            data.id = this.generateID();
-            tasks.push(data);
-        } else {
-            let index = _.findIndex(tasks, (task) => {
-                return task.id;
-            });
-            tasks[index] = data;
-        }
-        this.setState({
-            tasks: tasks,
-            taskEditing: null,
-        });
-        this.onCloseForm();
-        localStorage.setItem('tasks', JSON.stringify(tasks))
-    }
-
-    onUpdateStatus = (id) => {
-        let {tasks} = this.state;
-        // let index = this.findIndex(id);
-        let index = _.findIndex(tasks, (task) => {
-            return task.id === id;
-        });
-
-        if (index !== -1) {
-            tasks[index].status = !tasks[index].status;
-            this.setState({
-                tasks: tasks
-            });
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-        }
-    }
-
-    // findIndex = (id) => {
-    //     let {tasks} = this.state;
-    //     let result = -1;
-    //     tasks.forEach((task, index) => {
-    //         if (task.id === id) {
-    //             result = index;
-    //         }
-    //     });
-    //     return result;
-    // }
-
-    onDelete = (id) => {
-        let {tasks} = this.state;
-        let index = _.findIndex(tasks, (task) => {
-            return task.id === id;
-        });
-        if (index !== -1) {
-            tasks.splice(index, 1);
-            this.setState({
-                tasks: tasks
-            });
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-        }
     }
 
     onUpdate = (id) => {
@@ -162,18 +80,16 @@ class App extends Component {
 
     render() {
         let {
-            tasks,
-            isDisplayForm,
             taskEditing,
-            filter,
-            keyword,
+            // filter,
+            // keyword,
             sortBy,
             sortValue
         } = this.state;
 
-        tasks = _.filter(tasks, (task) =>{
-            return task.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1
-        })
+        // tasks = _.filter(tasks, (task) =>{
+        //     return task.name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1
+        // })
 
         // if (keyword) {
         //     tasks = tasks.filter((task) => {
@@ -181,43 +97,37 @@ class App extends Component {
         //     });
         // }
 
-        if (filter) {
-            if (filter.name) {
-                tasks = tasks.filter((task) => {
-                    return task.name.toLowerCase().indexOf(filter.name) !== -1;
-                });
-            }
-            tasks = tasks.filter((task) => {
-                if (filter.status === -1) {
-                    return task;
-                } else {
-                    return task.status === (filter.status === 1 ? true : false)
-                }
-            });
-        }
+        // if (filter) {
+        //     if (filter.name) {
+        //         tasks = tasks.filter((task) => {
+        //             return task.name.toLowerCase().indexOf(filter.name) !== -1;
+        //         });
+        //     }
+        //     tasks = tasks.filter((task) => {
+        //         if (filter.status === -1) {
+        //             return task;
+        //         } else {
+        //             return task.status === (filter.status === 1 ? true : false)
+        //         }
+        //     });
+        // }
 
-        if (sortBy === 'name') {
-            tasks.sort((a, b) => {
-                if (a.name > b.name) return sortValue;
-                else if (a.name < b.name) return -sortValue;
-                else return 0;
-            });
-        } else {
-            tasks.sort((a, b) => {
-                if (a.status > b.status) return -sortValue;
-                else if (a.status < b.status) return sortValue;
-                else return 0;
-            });
-        }
+        // if (sortBy === 'name') {
+        //     tasks.sort((a, b) => {
+        //         if (a.name > b.name) return sortValue;
+        //         else if (a.name < b.name) return -sortValue;
+        //         else return 0;
+        //     });
+        // } else {
+        //     tasks.sort((a, b) => {
+        //         if (a.status > b.status) return -sortValue;
+        //         else if (a.status < b.status) return sortValue;
+        //         else return 0;
+        //     });
+        // }
+        let {isDisplayForm} = this.props;
 
-        let elmTaskForm = isDisplayForm
-            ? <TaskForm
-                onSubmit={this.onSubmit}
-                onCloseForm={this.onCloseForm}
-                task={taskEditing}
-            />
-            : '';
-
+        let elmTaskForm = isDisplayForm === true ? <TaskForm task={taskEditing}/> : '';
 
         return (
             <div className="container">
@@ -244,9 +154,6 @@ class App extends Component {
                             sortBy={sortBy}
                             sortValues={sortValue}/>
                         <TaskList
-                            tasks={tasks}
-                            onUpdateStatus={this.onUpdateStatus}
-                            onDelete={this.onDelete}
                             onUpdate={this.onUpdate}
                             onFilter={this.onFilter}/>
                     </div>
@@ -254,7 +161,23 @@ class App extends Component {
             </div>
         );
     }
-
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        isDisplayForm: state.isDisplayForm
+    }
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        onToggleForm: () => {
+            dispatch(actions.toggleForm())
+        },
+        onCloseForm: () => {
+            dispatch(actions.closeForm())
+        },
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
